@@ -1,4 +1,5 @@
-﻿using DOTNET_RPG.Dtos.Character;
+﻿using DOTNET_RPG.Data;
+using DOTNET_RPG.Dtos.Character;
 using DOTNET_RPG.Model;
 using DOTNET_RPG.Services.CharacterService;
 using Microsoft.AspNetCore.Http;
@@ -11,10 +12,12 @@ namespace DOTNET_RPG.Controllers
     public class CharacterController : ControllerBase
     {
         private readonly ICharacterService _characterService;
+        private readonly DataContext _context;
 
-        public CharacterController(ICharacterService characterService)
+        public CharacterController(ICharacterService characterService, DataContext context)
         {
             _characterService = characterService;
+            _context = context;
         }
 
         [HttpGet("GetAll")]
@@ -32,7 +35,27 @@ namespace DOTNET_RPG.Controllers
         [HttpPost]
         public async Task<ActionResult<ServiceResponse<List<GetCharacterDto>>>> AddNewCharacter(AddCharacterDto newCharacter)
         {
-            return Ok(await _characterService.AddCharacter(newCharacter)); 
+            return Ok(await _characterService.AddCharacter(newCharacter));
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<ServiceResponse<List<GetCharacterDto>>>> UpdateCharacter(int id, UpdateCharacterDto updatedCharacter)
+        {
+            var response = await _characterService.UpdateCharacter(id, updatedCharacter);
+            if (response.Data == null)
+                return NotFound(response);
+
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult<ServiceResponse<GetCharacterDto>>> DeleteCharacterById(int id)
+        {
+            var response = await _characterService.DeleteCharacter(id);
+            if (response.Data is null)
+                return NotFound(response);
+
+            return Ok(response);
         }
     }
 }
