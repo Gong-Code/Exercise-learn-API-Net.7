@@ -12,7 +12,7 @@ namespace DOTNET_RPG.Services.CharacterService
         Task<ServiceResponse<List<GetCharacterDto>>> GetAllCharacters();
         Task<ServiceResponse<GetCharacterDto>> GetCharacterById(int id);
         Task<ServiceResponse<List<GetCharacterDto>>> AddCharacter(AddCharacterDto newCharacter);
-        Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(int id, UpdateCharacterDto updatedCharacter);
+        Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(UpdateCharacterDto updatedCharacter);
         Task<ServiceResponse<List<GetCharacterDto>>> DeleteCharacter(int id);
 
     }
@@ -61,22 +61,22 @@ namespace DOTNET_RPG.Services.CharacterService
             return serviceResponse;
         }
 
-        public async Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(int id, UpdateCharacterDto updatedCharacter)
+        public async Task<ServiceResponse<GetCharacterDto>> UpdateCharacter(UpdateCharacterDto updatedCharacter)
         {
             var serviceResponse = new ServiceResponse<GetCharacterDto>();
 
             try
             {
-                var dbUpdateCharacter = _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
+                var dbUpdateCharacter = _context.Characters.Find(updatedCharacter.Id);
 
                 if (dbUpdateCharacter is null)
-                    throw new Exception($"Character with id '{updatedCharacter}' not found.");
-            
-                var result = _mapper.Map<Character>(updatedCharacter);
+                    throw new Exception($"Character with id '{updatedCharacter.Id}' not found.");
+
+                var result =_mapper.Map(updatedCharacter, dbUpdateCharacter);
 
                 await _context.SaveChangesAsync();
 
-                serviceResponse.Data = _mapper.Map<GetCharacterDto>(dbUpdateCharacter);
+                serviceResponse.Data = _mapper.Map<GetCharacterDto>(result);
 
             }
             catch (Exception ex)
